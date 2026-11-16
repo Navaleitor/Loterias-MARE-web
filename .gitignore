@@ -1,0 +1,17 @@
+# Imagenes de las figuras y PDFs generados: NO se suben al repo
+Imagenes/
+Cartas_generadas/
+*.pdf
+*.jpg
+*.jpeg
+*.png
+
+# Configuracion y registro locales
+config.json
+registro.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

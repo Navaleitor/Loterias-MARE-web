@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loterías Mare · Generador</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #f6f1e7; --card: #ffffff; --ink: #231a14; --muted: #6f6359;
+    --line: #e2d8c6; --accent: #b3261e; --accent-ink: #ffffff;
+    --ok: #1f7a3d; --warn-bg: #fdf0d5; --err-bg: #fde3e1; --ok-bg: #e0f3e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1713; --card: #272019; --ink: #f3ebdf; --muted: #b3a595;
+      --line: #3b3126; --accent: #e5564d; --accent-ink: #1c1713;
+      --ok: #6fd08c; --warn-bg: #3a2f17; --err-bg: #43211f; --ok-bg: #1e3526;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 28px 16px 56px; }
+  h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.5px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+            padding: 18px; margin-bottom: 16px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+       margin: 0 0 12px; font-weight: 600; }
+  .tipos { display: grid; gap: 10px; }
+  .tipo { display: block; border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px;
+          cursor: pointer; }
+  .tipo input { position: absolute; opacity: 0; pointer-events: none; }
+  .tipo b { display: block; font-size: 17px; }
+  .tipo span { color: var(--muted); font-size: 14px; }
+  .tipo:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .tipo:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .cantidad { display: flex; align-items: center; gap: 10px; }
+  .cantidad input { width: 110px; font-size: 24px; text-align: center; padding: 8px;
+                    border: 2px solid var(--line); border-radius: 10px; background: transparent; color: var(--ink); }
+  .cantidad button { width: 44px; height: 44px; font-size: 22px; border-radius: 10px;
+                     border: 2px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+  .hint { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+  .nombre { font-family: ui-monospace, Consolas, monospace; background: var(--bg);
+            border-radius: 6px; padding: 2px 8px; }
+  .acciones { display: flex; gap: 10px; }
+  .btn { font: inherit; font-weight: 600; font-size: 18px; padding: 14px 22px; border-radius: 12px;
+         border: 0; cursor: pointer; background: var(--accent); color: var(--accent-ink); flex: 1; }
+  .btn.sec { background: transparent; color: var(--ink); border: 2px solid var(--line); flex: 0 0 auto; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .barra { height: 22px; background: var(--bg); border-radius: 11px; overflow: hidden; border: 1px solid var(--line); }
+  .barra > div { height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+  .progreso-txt { display: flex; justify-content: space-between; margin-top: 8px; color: var(--muted); font-size: 15px; }
+  .aviso { border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
+  .aviso.error { background: var(--err-bg); }
+  .aviso.ok { background: var(--ok-bg); }
+  .aviso.warn { background: var(--warn-bg); }
+  details summary { cursor: pointer; font-weight: 600; color: var(--muted); }
+  label.campo { display: block; margin-top: 14px; font-size: 14px; color: var(--muted); }
+  label.campo input { display: block; width: 100%; margin-top: 4px; font: inherit; padding: 9px 10px;
+                      border: 2px solid var(--line); border-radius: 8px; background: transparent; color: var(--ink); }
+  .estado-img { font-size: 14px; margin-top: 4px; }
+  .aviso a { color: var(--accent); font-weight: 600; }
+  .oculto { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Loterías Mare</h1>
+  <p class="sub">Elige el tipo de lotería y cuántas cartas quieres. Te entrego un solo PDF listo para imprimir.</p>
+
+  <section>
+    <h2>1 · Tipo de lotería</h2>
+    <div class="tipos" id="tipos"></div>
+  </section>
+
+  <section>
+    <h2>2 · Cantidad de cartas</h2>
+    <div class="cantidad">
+      <button type="button" id="menos" aria-label="Una menos">−</button>
+      <input type="number" id="cantidad" min="1" value="10" inputmode="numeric" aria-label="Cantidad de cartas">
+      <button type="button" id="mas" aria-label="Una más">+</button>
+    </div>
+    <p class="hint">El PDF se llamará <span class="nombre" id="nombre-pdf">centros_doble_10.pdf</span></p>
+  </section>
+
+  <section>
+    <div class="acciones">
+      <button class="btn" id="generar">Generar PDF</button>
+      <button class="btn sec oculto" id="cancelar">Cancelar</button>
+    </div>
+    <div id="progreso" class="oculto" style="margin-top:16px">
+      <div class="barra"><div id="relleno"></div></div>
+      <div class="progreso-txt"><span id="progreso-txt">0 de 0</span><span id="porcentaje">0%</span></div>
+    </div>
+    <div id="resultado"></div>
+  </section>
+
+  <section>
+    <details id="ajustes">
+      <summary>Carpetas (imágenes y PDFs)</summary>
+      <label class="campo">Carpeta con las imágenes (1.jpg a 54.jpg)
+        <input type="text" id="carpeta-imagenes" spellcheck="false">
+      </label>
+      <div class="estado-img" id="estado-img"></div>
+      <label class="campo">Carpeta donde se guardan los PDF
+        <input type="text" id="carpeta-salida" spellcheck="false">
+      </label>
+      <p class="hint">Los cambios se guardan al salir del campo.</p>
+    </details>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let tipos = [], max = 300, corriendo = false, temporizador = null;
+
+async function api(url, opciones) {
+  const r = await fetch(url, opciones);
+  const datos = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(datos.error || "Error inesperado");
+  return datos;
+}
+const post = (url, cuerpo) => api(url, {
+  method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(cuerpo || {})
+});
+
+function tipoElegido() { return document.querySelector("input[name=tipo]:checked").value; }
+function cantidadValida() {
+  const n = Number($("cantidad").value);
+  return Number.isInteger(n) && n >= 1 && n <= max ? n : null;
+}
+function actualizarNombre() {
+  const t = tipos.find(x => x.id === tipoElegido());
+  const n = cantidadValida();
+  $("nombre-pdf").textContent = t && n ? `${t.archivo}_${n}.pdf` : "—";
+  $("generar").disabled = corriendo || !n;
+}
+
+function pintarImagenes(img, carpeta) {
+  const e = $("estado-img");
+  if (!img.existe) { e.textContent = "⚠ La carpeta no existe."; return; }
+  e.textContent = img.ok ? "✓ Las 54 imágenes están completas." : `⚠ Faltan ${img.faltan} imágenes en esta carpeta.`;
+}
+async function cargarConfig() {
+  const c = await api("/api/config");
+  $("carpeta-imagenes").value = c.carpeta_imagenes;
+  $("carpeta-salida").value = c.carpeta_salida;
+  pintarImagenes(c.imagenes);
+  if (!c.imagenes.ok) $("ajustes").open = true;
+}
+async function guardarConfig() {
+  const c = await post("/api/config", {
+    carpeta_imagenes: $("carpeta-imagenes").value, carpeta_salida: $("carpeta-salida").value
+  });
+  pintarImagenes(c.imagenes);
+}
+
+function aviso(clase, texto, extra) {
+  const d = document.createElement("div");
+  d.className = "aviso " + clase;
+  d.textContent = texto;
+  if (extra) d.appendChild(extra);
+  $("resultado").replaceChildren(d);
+}
+
+function pintarEstado(e) {
+  const mostrando = e.estado === "corriendo";
+  $("progreso").classList.toggle("oculto", !(mostrando || e.estado === "terminado"));
+  $("cancelar").classList.toggle("oculto", !mostrando);
+  const pct = e.total ? Math.round(100 * e.actual / e.total) : 0;
+  $("relleno").style.width = pct + "%";
+  $("porcentaje").textContent = pct + "%";
+  $("progreso-txt").textContent = e.fase === "guardando"
+    ? "Guardando el PDF…" : `${e.actual} de ${e.total}`;
+}
+
+async function sondear() {
+  const e = await api("/api/estado");
+  pintarEstado(e);
+  if (e.estado === "corriendo") return;
+  clearInterval(temporizador); temporizador = null; corriendo = false; actualizarNombre();
+  if (e.estado === "terminado") {
+    const enlace = document.createElement("a");
+    enlace.href = "/descargar/" + encodeURIComponent(e.archivo);
+    enlace.textContent = " Descargar de nuevo";
+    enlace.setAttribute("download", e.archivo);
+    aviso("ok", `✓ Listo: ${e.archivo}. Guardado en ${e.ruta}.`, enlace);
+    enlace.click();  // la descarga empieza sola
+  } else if (e.estado === "error") {
+    aviso("error", e.mensaje);
+  } else if (e.estado === "cancelado") {
+    aviso("warn", e.mensaje);
+  }
+}
+
+async function generar() {
+  $("resultado").replaceChildren();
+  try {
+    await post("/api/generar", { tipo: tipoElegido(), cantidad: cantidadValida() });
+  } catch (err) { aviso("error", err.message); return; }
+  corriendo = true; actualizarNombre();
+  pintarEstado({estado: "corriendo", actual: 0, total: cantidadValida(), fase: "generando"});
+  temporizador = setInterval(sondear, 500);
+}
+
+async function iniciar() {
+  const datos = await api("/api/tipos");
+  tipos = datos.tipos; max = datos.max;
+  $("cantidad").max = max;
+  $("tipos").replaceChildren(...tipos.map((t, i) => {
+    const l = document.createElement("label"); l.className = "tipo";
+    l.innerHTML = '<input type="radio" name="tipo"><b></b><span></span>';
+    const r = l.querySelector("input"); r.value = t.id; r.checked = i === 0;
+    l.querySelector("b").textContent = t.nombre;
+    l.querySelector("span").textContent = t.descripcion;
+    r.addEventListener("change", actualizarNombre);
+    return l;
+  }));
+  $("cantidad").addEventListener("input", actualizarNombre);
+  $("menos").onclick = () => { $("cantidad").value = Math.max(1, (Number($("cantidad").value) || 1) - 1); actualizarNombre(); };
+  $("mas").onclick = () => { $("cantidad").value = Math.min(max, (Number($("cantidad").value) || 0) + 1); actualizarNombre(); };
+  $("generar").onclick = generar;
+  $("cancelar").onclick = () => post("/api/cancelar");
+  $("carpeta-imagenes").addEventListener("change", guardarConfig);
+  $("carpeta-salida").addEventListener("change", guardarConfig);
+  actualizarNombre();
+  await cargarConfig();
+  // Si la pagina se recarga con un trabajo en curso, retoma el progreso.
+  const e = await api("/api/estado");
+  if (e.estado === "corriendo") { corriendo = true; actualizarNombre(); temporizador = setInterval(sondear, 500); }
+}
+iniciar().catch(err => aviso("error", "No se pudo conectar con el programa: " + err.message));
+</script>
+</body>
+</html>
