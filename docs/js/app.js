@@ -70,9 +70,13 @@
     relleno.style.width = p + "%";
     relleno.parentNode.setAttribute("aria-valuenow", String(p));
   }
+  function verSeccion(seccion) {
+    try { seccion.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e) { /* nada */ }
+  }
   function mostrarAviso(texto) {
     el.avisoTexto.textContent = texto;
     el.aviso.hidden = !texto;
+    if (texto) verSeccion(el.aviso);
   }
   function tipoElegido() {
     var marcado = el.tipos.querySelector("input[name=tipo]:checked");
@@ -318,6 +322,7 @@
         ". Si no lo ves en tus descargas, presiona el botón.";
     }
     el.resultado.hidden = false;
+    verSeccion(el.resultado);
     descargarArchivo(estado.urlPdf, nombre);
   }
 
@@ -335,6 +340,7 @@
     actualizarBotonGenerar();
     el.form.querySelectorAll("input").forEach(function (i) { i.disabled = true; });
     el.trabajo.hidden = false;
+    verSeccion(el.trabajo);
     el.cancelar.disabled = false;
     el.trabajoTexto.textContent = "Preparando…";
     barra(el.trabajoRelleno, 0);
