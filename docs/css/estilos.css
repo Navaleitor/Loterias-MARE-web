@@ -1,0 +1,173 @@
+/* Loterias Mare - estilos (primero celular, luego pantallas grandes) */
+
+:root {
+  --fondo: #f6f1ea;
+  --tarjeta: #ffffff;
+  --texto: #2a2024;
+  --suave: #6d6166;
+  --borde: #e2d8cf;
+  --primario: #7a1f3d;
+  --primario-oscuro: #5c1730;
+  --primario-claro: #f4e3e9;
+  --exito: #1f6b3a;
+  --exito-claro: #e5f3ea;
+  --error: #a3271c;
+  --error-claro: #fbe9e7;
+  --radio: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #1b1618;
+    --tarjeta: #261f22;
+    --texto: #f3ecee;
+    --suave: #b9adb2;
+    --borde: #3d3236;
+    --primario: #d0577f;
+    --primario-oscuro: #e07397;
+    --primario-claro: #3a2229;
+    --exito: #6fcf93;
+    --exito-claro: #1d3326;
+    --error: #ff8a7f;
+    --error-claro: #3b2220;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font: 17px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.contenedor {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+}
+
+.encabezado h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  color: var(--primario);
+  letter-spacing: -0.01em;
+}
+.subtitulo { margin: 4px 0 18px; color: var(--suave); }
+
+.tarjeta {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 18px 16px;
+  margin-bottom: 16px;
+}
+
+[hidden] { display: none !important; }
+
+/* ----- Tipos de loteria (botones grandes) ----- */
+.tipos { border: 0; margin: 0 0 18px; padding: 0; min-width: 0; }
+.tipos legend, .campo label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding: 0;
+}
+.opcion {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 2px solid var(--borde);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  min-height: 56px;
+}
+.opcion input {
+  width: 22px; height: 22px;
+  margin: 2px 0 0;
+  accent-color: var(--primario);
+  flex: none;
+}
+.opcion-nombre { display: block; font-weight: 700; }
+.opcion-desc { display: block; color: var(--suave); font-size: 0.92rem; }
+.opcion:has(input:checked) { border-color: var(--primario); background: var(--primario-claro); }
+.opcion:has(input:focus-visible) { outline: 3px solid var(--primario); outline-offset: 2px; }
+
+/* ----- Cantidad ----- */
+.campo { margin-bottom: 18px; }
+.campo input {
+  width: 100%;
+  font-size: 1.4rem;
+  padding: 12px 14px;
+  border: 2px solid var(--borde);
+  border-radius: 12px;
+  background: var(--tarjeta);
+  color: var(--texto);
+}
+.campo input:focus { outline: none; border-color: var(--primario); }
+.campo input[aria-invalid="true"] { border-color: var(--error); }
+.ayuda { margin: 6px 0 0; color: var(--suave); font-size: 0.95rem; }
+.error-campo { margin: 6px 0 0; color: var(--error); font-weight: 600; }
+
+/* ----- Botones ----- */
+.boton {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.boton-principal { background: var(--primario); color: #fff; }
+.boton-principal:hover { background: var(--primario-oscuro); }
+.boton-principal:disabled { opacity: 0.45; cursor: not-allowed; }
+.boton-secundario {
+  background: transparent;
+  color: var(--primario);
+  border: 2px solid var(--primario);
+  margin-top: 14px;
+}
+.boton:focus-visible { outline: 3px solid var(--primario); outline-offset: 3px; }
+
+/* ----- Barras de progreso ----- */
+.barra {
+  height: 16px;
+  border-radius: 999px;
+  background: var(--borde);
+  overflow: hidden;
+}
+.barra-relleno {
+  height: 100%;
+  width: 0;
+  background: var(--primario);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+#carga-texto, #trabajo-texto { margin: 0 0 10px; font-weight: 600; }
+
+/* ----- Resultado y avisos ----- */
+.resultado { background: var(--exito-claro); border-color: var(--exito); }
+.resultado p { margin: 0 0 14px; font-weight: 600; }
+.aviso { background: var(--error-claro); border-color: var(--error); }
+.aviso p { margin: 0; color: var(--error); font-weight: 600; }
+
+.pie { text-align: center; color: var(--suave); font-size: 0.85rem; }
+
+@media (min-width: 700px) {
+  .contenedor { padding-top: 40px; }
+  .encabezado h1 { font-size: 2.3rem; }
+  .tarjeta { padding: 24px; }
+}
