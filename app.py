@@ -27,7 +27,7 @@ LOG_PATH = os.path.join(BASE, "registro.log")
 MAX_CANTIDAD = 300   # Cada hoja comprimida ocupa memoria hasta el final: 300 es un tope seguro.
 
 CONFIG_INICIAL = {
-    "carpeta_imagenes": os.path.join(BASE, "Imagenes"),
+    "carpeta_imagenes": os.path.join(BASE, "imagenes_loteria"),
     "carpeta_salida": os.path.join(BASE, "Cartas_generadas"),
 }
 
