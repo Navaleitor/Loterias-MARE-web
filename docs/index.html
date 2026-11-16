@@ -3,20 +3,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#7a1f3d">
+  <meta name="theme-color" content="#e4007c">
   <meta name="description" content="Genera cartas de lotería mexicana en un PDF listo para imprimir.">
   <title>Loterías Mare</title>
   <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
+  <!-- Figura del papel picado (se repite con distintos colores) -->
+  <svg width="0" height="0" class="oculto" aria-hidden="true" focusable="false">
+    <symbol id="bandera" viewBox="0 0 60 72">
+      <path fill-rule="evenodd" d="M0 0H60V60L55 66 50 60 45 66 40 60 35 66 30 60 25 66 20 60 15 66 10 60 5 66 0 60Z
+        M30 12L41 27 30 42 19 27Z
+        M8 8h7v7H8Z M45 8h7v7h-7Z M8 40h7v7H8Z M45 40h7v7h-7Z
+        M30 46l4 5-4 5-4-5Z M17 27l-5 3V24Z M43 27l5-3v6Z"/>
+    </symbol>
+  </svg>
+
+  <div id="papel-picado" class="papel-picado" aria-hidden="true"></div>
+
   <main class="contenedor">
-    <header class="encabezado">
-      <h1>Loterías Mare</h1>
-      <p class="subtitulo">Genera tus cartas en un PDF listo para imprimir.</p>
+    <header class="cabecera">
+      <div id="abanico" class="abanico" aria-hidden="true"></div>
+      <h1 class="titulo">
+        <span class="titulo-chico">Loterías</span>
+        <span class="titulo-grande">Mare</span>
+      </h1>
+      <p class="subtitulo">Arma tus cartas y llévatelas en un PDF listo para imprimir.</p>
     </header>
 
     <!-- Carga inicial de imagenes -->
-    <section id="carga" class="tarjeta" aria-live="polite">
+    <section id="carga" class="tarjeta carga" aria-live="polite">
       <p id="carga-texto">Cargando imágenes…</p>
       <div class="barra" role="progressbar" aria-label="Carga de imágenes" aria-valuemin="0" aria-valuemax="100">
         <div id="carga-relleno" class="barra-relleno"></div>
@@ -26,14 +42,19 @@
 
     <form id="formulario" class="tarjeta" novalidate>
       <fieldset id="tipos" class="tipos">
-        <legend>1. Elige el tipo de lotería</legend>
+        <legend class="paso"><span class="paso-numero">1</span> Elige el tipo de lotería</legend>
         <!-- Las opciones se crean desde js/tipos.js -->
       </fieldset>
 
       <div class="campo">
-        <label for="cantidad">2. ¿Cuántas cartas?</label>
-        <input id="cantidad" name="cantidad" type="text" inputmode="numeric" pattern="[0-9]*"
-               autocomplete="off" value="10" aria-describedby="limite">
+        <label for="cantidad" class="paso"><span class="paso-numero">2</span> ¿Cuántas cartas?</label>
+        <div class="cantidad-fila">
+          <button type="button" class="ajuste" data-paso="-1" aria-label="Una carta menos">−</button>
+          <input id="cantidad" name="cantidad" type="text" inputmode="numeric" pattern="[0-9]*"
+                 autocomplete="off" value="10" aria-describedby="limite">
+          <button type="button" class="ajuste" data-paso="1" aria-label="Una carta más">+</button>
+        </div>
+        <div id="atajos" class="atajos" aria-label="Cantidades rápidas"></div>
         <p id="limite" class="ayuda">Máximo 300 cartas.</p>
         <p id="error-cantidad" class="error-campo" role="alert" hidden></p>
       </div>
@@ -41,8 +62,11 @@
       <button id="btn-generar" class="boton boton-principal" type="submit" disabled>Generar</button>
     </form>
 
-    <!-- Progreso del trabajo -->
-    <section id="trabajo" class="tarjeta" hidden aria-live="polite">
+    <!-- Progreso del trabajo: "el cantor" va sacando cartas -->
+    <section id="trabajo" class="tarjeta trabajo" hidden aria-live="polite">
+      <div class="cantor" aria-hidden="true">
+        <img id="cantor-carta" class="cantor-carta" alt="" width="140" height="200">
+      </div>
       <p id="trabajo-texto">Preparando…</p>
       <div class="barra" role="progressbar" aria-label="Progreso" aria-valuemin="0" aria-valuemax="100">
         <div id="trabajo-relleno" class="barra-relleno"></div>
@@ -52,6 +76,7 @@
 
     <!-- Resultado -->
     <section id="resultado" class="tarjeta resultado" hidden aria-live="polite">
+      <p class="grito" aria-hidden="true">¡Lotería!</p>
       <p id="resultado-texto"></p>
       <a id="btn-descargar" class="boton boton-principal" href="#" download>Descargar de nuevo</a>
     </section>

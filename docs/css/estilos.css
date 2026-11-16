@@ -1,173 +1,462 @@
-/* Loterias Mare - estilos (primero celular, luego pantallas grandes) */
+/* ===============================================================
+   Loterias Mare - estilos con tematica de loteria mexicana
+   (primero celular, luego pantallas grandes; sin fuentes externas)
+   =============================================================== */
 
 :root {
-  --fondo: #f6f1ea;
-  --tarjeta: #ffffff;
-  --texto: #2a2024;
-  --suave: #6d6166;
-  --borde: #e2d8cf;
-  --primario: #7a1f3d;
-  --primario-oscuro: #5c1730;
-  --primario-claro: #f4e3e9;
-  --exito: #1f6b3a;
-  --exito-claro: #e5f3ea;
-  --error: #a3271c;
-  --error-claro: #fbe9e7;
+  /* Colores de feria */
+  --rosa: #e4007c;          /* rosa mexicano */
+  --rosa-oscuro: #b00060;
+  --naranja: #f7941d;
+  --amarillo: #ffc20e;
+  --verde: #00a651;
+  --turquesa: #00a3ad;
+  --morado: #6b2c91;
+  --rojo: #d7263d;
+
+  --papel: #fff4dc;         /* fondo de cartoncillo */
+  --papel-2: #fbe6bd;
+  --tarjeta: #fffdf7;
+  --tinta: #2b1a12;         /* negro cafe, como la tinta de las cartas */
+  --suave: #6e5646;
+  --borde: #2b1a12;
+  --exito-claro: #e3f6ea;
+  --error: #b3261e;
+  --error-claro: #fde8e6;
+
+  --letra-carta: "Rockwell", "Roboto Slab", "Clarendon", "Bookman Old Style", "Georgia", serif;
+  --letra: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --radio: 14px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --fondo: #1b1618;
-    --tarjeta: #261f22;
-    --texto: #f3ecee;
-    --suave: #b9adb2;
-    --borde: #3d3236;
-    --primario: #d0577f;
-    --primario-oscuro: #e07397;
-    --primario-claro: #3a2229;
-    --exito: #6fcf93;
-    --exito-claro: #1d3326;
-    --error: #ff8a7f;
-    --error-claro: #3b2220;
+    --papel: #24141d;
+    --papel-2: #2e1a26;
+    --tarjeta: #33212b;
+    --tinta: #fff1df;
+    --suave: #d8bfae;
+    --borde: #120a0e;
+    --exito-claro: #1f3a2a;
+    --error: #ff9c90;
+    --error-claro: #44221f;
   }
 }
 
 * { box-sizing: border-box; }
-
 html { -webkit-text-size-adjust: 100%; }
+[hidden] { display: none !important; }
+.oculto { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 body {
   margin: 0;
-  background: var(--fondo);
-  color: var(--texto);
-  font: 17px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--tinta);
+  font: 17px/1.45 var(--letra);
+  background-color: var(--papel);
+  /* textura suave de papel con puntitos de colores */
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(228, 0, 124, 0.06) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 80%, rgba(0, 163, 173, 0.06) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 50%, rgba(255, 194, 14, 0.08) 0 2px, transparent 3px);
+  background-size: 46px 46px, 62px 62px, 38px 38px;
+  min-height: 100vh;
 }
 
+/* ----------------- Papel picado ----------------- */
+.papel-picado {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  height: 78px;
+  overflow: hidden;
+  padding-top: 6px;
+}
+.papel-picado::before {          /* el cordon del que cuelgan */
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 5px;
+  height: 2px;
+  background: var(--tinta);
+  opacity: 0.55;
+}
+.bandera {
+  flex: none;
+  width: 52px;
+  height: 64px;
+  transform-origin: 50% 0;
+  animation: mecer 4s ease-in-out infinite;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.15));
+}
+.bandera:nth-child(even) { animation-delay: -2s; }
+.bandera:nth-child(3n) { animation-duration: 5s; }
+.bandera svg { width: 100%; height: 100%; display: block; }
+@keyframes mecer {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+/* ----------------- Estructura ----------------- */
 .contenedor {
-  max-width: 560px;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 20px 16px 32px;
+  padding: 4px 16px 32px;
 }
 
-.encabezado h1 {
-  margin: 0;
-  font-size: 1.9rem;
-  color: var(--primario);
-  letter-spacing: -0.01em;
-}
-.subtitulo { margin: 4px 0 18px; color: var(--suave); }
+/* ----------------- Cabecera ----------------- */
+.cabecera { text-align: center; margin-bottom: 18px; }
 
+.abanico {
+  position: relative;
+  height: 150px;
+  margin: 4px auto 0;
+  max-width: 340px;
+}
+.abanico img {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 84px;
+  height: 120px;
+  margin-left: -42px;
+  object-fit: cover;
+  border: 4px solid #fff;
+  outline: 1px solid var(--borde);
+  border-radius: 6px;
+  box-shadow: 0 6px 14px rgba(43, 26, 18, 0.28);
+  transform-origin: 50% 120%;
+  background: var(--papel-2);
+  transition: transform 0.3s ease;
+}
+.abanico img:nth-child(1) { transform: rotate(-26deg); }
+.abanico img:nth-child(2) { transform: rotate(-13deg); }
+.abanico img:nth-child(3) { transform: rotate(0deg) translateY(-6px); z-index: 2; }
+.abanico img:nth-child(4) { transform: rotate(13deg); }
+.abanico img:nth-child(5) { transform: rotate(26deg); }
+
+.titulo {
+  position: relative;
+  z-index: 3;
+  margin: 30px 0 0;
+  font-family: var(--letra-carta);
+  font-weight: 900;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+.titulo-chico {
+  display: block;
+  font-size: 1.05rem;
+  letter-spacing: 0.35em;
+  color: var(--turquesa);
+}
+.titulo-grande {
+  display: inline-block;
+  font-size: 3.2rem;
+  letter-spacing: 0.04em;
+  color: var(--rosa);
+  text-shadow: 3px 3px 0 var(--amarillo), 5px 5px 0 var(--tinta);
+}
+.subtitulo { margin: 10px 0 0; color: var(--suave); }
+
+/* ----------------- Tarjetas (secciones) ----------------- */
 .tarjeta {
+  position: relative;
   background: var(--tarjeta);
-  border: 1px solid var(--borde);
+  border: 3px solid var(--borde);
   border-radius: var(--radio);
   padding: 18px 16px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  box-shadow: 6px 6px 0 var(--rosa);
 }
 
-[hidden] { display: none !important; }
-
-/* ----- Tipos de loteria (botones grandes) ----- */
-.tipos { border: 0; margin: 0 0 18px; padding: 0; min-width: 0; }
-.tipos legend, .campo label {
-  display: block;
-  font-weight: 700;
-  margin-bottom: 10px;
+/* Pasos 1 y 2 con numero en circulo, como la esquina de una carta */
+.paso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--letra-carta);
+  font-weight: 800;
+  font-size: 1.15rem;
+  margin-bottom: 12px;
   padding: 0;
 }
-.opcion {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  border: 2px solid var(--borde);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  min-height: 56px;
-}
-.opcion input {
-  width: 22px; height: 22px;
-  margin: 2px 0 0;
-  accent-color: var(--primario);
+.paso-numero {
   flex: none;
-}
-.opcion-nombre { display: block; font-weight: 700; }
-.opcion-desc { display: block; color: var(--suave); font-size: 0.92rem; }
-.opcion:has(input:checked) { border-color: var(--primario); background: var(--primario-claro); }
-.opcion:has(input:focus-visible) { outline: 3px solid var(--primario); outline-offset: 2px; }
-
-/* ----- Cantidad ----- */
-.campo { margin-bottom: 18px; }
-.campo input {
-  width: 100%;
-  font-size: 1.4rem;
-  padding: 12px 14px;
+  display: inline-grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--amarillo);
+  color: #2b1a12;
   border: 2px solid var(--borde);
-  border-radius: 12px;
-  background: var(--tarjeta);
-  color: var(--texto);
+  font-size: 1rem;
 }
-.campo input:focus { outline: none; border-color: var(--primario); }
-.campo input[aria-invalid="true"] { border-color: var(--error); }
-.ayuda { margin: 6px 0 0; color: var(--suave); font-size: 0.95rem; }
-.error-campo { margin: 6px 0 0; color: var(--error); font-weight: 600; }
 
-/* ----- Botones ----- */
+/* ----------------- Tipos: cada uno como carta de loteria ----------------- */
+.tipos { border: 0; margin: 0 0 20px; padding: 0; min-width: 0; }
+
+.opcion {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: #fff;
+  color: #2b1a12;
+  border: 3px solid #2b1a12;
+  border-radius: 10px;
+  padding: 10px 12px 10px 10px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 5px #2b1a12;  /* doble marco de carta */
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.opcion:hover { transform: translateY(-2px); }
+
+.opcion-vista {
+  flex: none;
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  background: repeating-linear-gradient(45deg, #f3e6cc 0 6px, #ead8b4 6px 12px);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.opcion-vista canvas {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  border-radius: 3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.opcion-textos { flex: 1; min-width: 0; padding-right: 30px; }
+.opcion-nombre {
+  display: block;
+  font-family: var(--letra-carta);
+  font-weight: 900;
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.opcion-desc { display: block; color: #6e5646; font-size: 0.9rem; line-height: 1.35; margin-top: 2px; }
+
+/* El radio es la casilla donde se pone el frijolito */
+.opcion input {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 30px; height: 30px;
+  margin: 0;
+  border-radius: 50%;
+  border: 2px dashed #b89a7e;
+  background: transparent;
+  cursor: pointer;
+}
+.opcion input:checked {
+  border: 0;
+  /* frijol: ovalo cafe con brillo */
+  background:
+    radial-gradient(ellipse 30% 20% at 38% 35%, rgba(255, 255, 255, 0.55), transparent 70%),
+    radial-gradient(ellipse 48% 34% at 50% 50%, #5a3a22 0 95%, transparent 100%);
+  transform: rotate(-25deg);
+  filter: drop-shadow(1px 2px 1px rgba(0, 0, 0, 0.35));
+}
+.opcion input:focus-visible { outline: 3px solid var(--turquesa); outline-offset: 2px; }
+
+.opcion:has(input:checked) {
+  border-color: var(--rosa);
+  box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 5px var(--rosa), 4px 4px 0 var(--rosa);
+  transform: translateY(-2px) rotate(-0.6deg);
+}
+.opcion:has(input:checked) .opcion-nombre { color: var(--rosa-oscuro); }
+
+/* ----------------- Cantidad ----------------- */
+.campo { margin-bottom: 20px; }
+.cantidad-fila { display: flex; gap: 10px; align-items: stretch; }
+.campo input {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-family: var(--letra-carta);
+  font-weight: 800;
+  font-size: 1.8rem;
+  padding: 8px 10px;
+  border: 3px solid var(--borde);
+  border-radius: 12px;
+  background: #fff;
+  color: #2b1a12;
+}
+.campo input:focus { outline: 3px solid var(--turquesa); outline-offset: 2px; }
+.campo input[aria-invalid="true"] { border-color: var(--error); background: #fff3f1; }
+
+.ajuste {
+  flex: none;
+  width: 58px;
+  border: 3px solid var(--borde);
+  border-radius: 12px;
+  background: var(--amarillo);
+  color: #2b1a12;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--borde);
+  -webkit-tap-highlight-color: transparent;
+}
+.ajuste:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--borde); }
+
+.atajos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.atajo {
+  border: 2px solid var(--borde);
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: var(--tarjeta);
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.atajo:nth-child(5n+1) { background: #ffe1f0; color: #2b1a12; }
+.atajo:nth-child(5n+2) { background: #ffe8c7; color: #2b1a12; }
+.atajo:nth-child(5n+3) { background: #fff3c2; color: #2b1a12; }
+.atajo:nth-child(5n+4) { background: #d8f3e3; color: #2b1a12; }
+.atajo:nth-child(5n+5) { background: #d3f1f3; color: #2b1a12; }
+
+.ayuda { margin: 10px 0 0; color: var(--suave); font-size: 0.95rem; }
+.error-campo { margin: 8px 0 0; color: var(--error); font-weight: 700; }
+
+button:disabled, input:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ----------------- Botones ----------------- */
 .boton {
   display: block;
   width: 100%;
-  min-height: 56px;
+  min-height: 60px;
   padding: 14px 18px;
-  border: 0;
-  border-radius: 12px;
-  font: inherit;
-  font-size: 1.15rem;
-  font-weight: 700;
+  border: 3px solid var(--borde);
+  border-radius: 14px;
+  font-family: var(--letra-carta);
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
-.boton-principal { background: var(--primario); color: #fff; }
-.boton-principal:hover { background: var(--primario-oscuro); }
-.boton-principal:disabled { opacity: 0.45; cursor: not-allowed; }
+.boton-principal {
+  background: var(--rosa);
+  color: #fff;
+  box-shadow: 0 6px 0 var(--borde);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+}
+.boton-principal:hover { background: var(--rosa-oscuro); }
+.boton-principal:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--borde); }
+.boton-principal:disabled { opacity: 0.5; transform: none; box-shadow: 0 6px 0 var(--borde); }
 .boton-secundario {
-  background: transparent;
-  color: var(--primario);
-  border: 2px solid var(--primario);
-  margin-top: 14px;
+  margin-top: 16px;
+  min-height: 52px;
+  font-size: 1.05rem;
+  background: var(--tarjeta);
+  color: var(--tinta);
+  box-shadow: 0 4px 0 var(--borde);
 }
-.boton:focus-visible { outline: 3px solid var(--primario); outline-offset: 3px; }
+.boton-secundario:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--borde); }
+.boton:focus-visible { outline: 3px solid var(--turquesa); outline-offset: 4px; }
 
-/* ----- Barras de progreso ----- */
+/* ----------------- Barras de progreso (tira de papel picado) ----------------- */
 .barra {
-  height: 16px;
+  height: 20px;
+  border: 2px solid var(--borde);
   border-radius: 999px;
-  background: var(--borde);
+  background: var(--papel-2);
   overflow: hidden;
 }
 .barra-relleno {
   height: 100%;
   width: 0;
-  background: var(--primario);
-  border-radius: 999px;
-  transition: width 0.2s ease;
+  background: repeating-linear-gradient(90deg,
+    var(--rosa) 0 18px, var(--naranja) 18px 36px, var(--amarillo) 36px 54px,
+    var(--verde) 54px 72px, var(--turquesa) 72px 90px, var(--morado) 90px 108px);
+  transition: width 0.25s ease;
 }
 
-#carga-texto, #trabajo-texto { margin: 0 0 10px; font-weight: 600; }
+#carga-texto, #trabajo-texto {
+  margin: 0 0 12px;
+  font-family: var(--letra-carta);
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-align: center;
+}
+.carga { box-shadow: 6px 6px 0 var(--turquesa); }
 
-/* ----- Resultado y avisos ----- */
-.resultado { background: var(--exito-claro); border-color: var(--exito); }
-.resultado p { margin: 0 0 14px; font-weight: 600; }
-.aviso { background: var(--error-claro); border-color: var(--error); }
-.aviso p { margin: 0; color: var(--error); font-weight: 600; }
+/* ----------------- El cantor (progreso) ----------------- */
+.trabajo { box-shadow: 6px 6px 0 var(--naranja); }
+.cantor { display: grid; place-items: center; margin-bottom: 14px; perspective: 600px; }
+.cantor-carta {
+  width: 112px;
+  height: 160px;
+  object-fit: cover;
+  border: 5px solid #fff;
+  outline: 2px solid var(--borde);
+  border-radius: 8px;
+  background: var(--papel-2);
+  box-shadow: 0 8px 18px rgba(43, 26, 18, 0.3);
+}
+.cantor-carta.volteo { animation: volteo 0.35s ease; }
+@keyframes volteo {
+  0% { transform: rotateY(90deg) scale(0.95); }
+  100% { transform: rotateY(0) scale(1); }
+}
 
-.pie { text-align: center; color: var(--suave); font-size: 0.85rem; }
+/* ----------------- Resultado y avisos ----------------- */
+.resultado {
+  text-align: center;
+  background: var(--exito-claro);
+  box-shadow: 6px 6px 0 var(--verde);
+}
+.grito {
+  margin: 0 0 6px;
+  font-family: var(--letra-carta);
+  font-weight: 900;
+  font-size: 2.6rem;
+  text-transform: uppercase;
+  color: var(--rosa);
+  text-shadow: 3px 3px 0 var(--amarillo), 5px 5px 0 var(--tinta);
+  animation: brinco 0.6s ease;
+}
+@keyframes brinco {
+  0% { transform: scale(0.4) rotate(-8deg); opacity: 0; }
+  70% { transform: scale(1.12) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
+}
+.resultado p#resultado-texto { margin: 0 0 16px; font-weight: 600; }
 
+.aviso { background: var(--error-claro); box-shadow: 6px 6px 0 var(--rojo); }
+.aviso p { margin: 0; color: var(--error); font-weight: 700; }
+
+.pie { text-align: center; color: var(--suave); font-size: 0.85rem; margin-top: 8px; }
+
+/* ----------------- Pantallas grandes ----------------- */
 @media (min-width: 700px) {
-  .contenedor { padding-top: 40px; }
-  .encabezado h1 { font-size: 2.3rem; }
+  .contenedor { padding-top: 10px; }
+  .abanico { height: 190px; max-width: 420px; }
+  .abanico img { width: 108px; height: 154px; margin-left: -54px; }
+  .titulo-grande { font-size: 4rem; }
   .tarjeta { padding: 24px; }
+  .opcion-vista { width: 120px; height: 110px; }
+  .bandera { width: 60px; height: 72px; }
+  .papel-picado { height: 86px; }
+}
+
+/* Sin animaciones para quien lo prefiera */
+@media (prefers-reduced-motion: reduce) {
+  .bandera, .grito, .cantor-carta.volteo { animation: none; }
+  .opcion, .boton, .abanico img { transition: none; }
 }

@@ -197,17 +197,143 @@
       var input = document.createElement("input");
       input.type = "radio"; input.name = "tipo"; input.value = t.id;
       if (i === 0) input.checked = true;
+      // Vista previa: se dibuja una hoja de verdad cuando terminan de cargar las imagenes.
+      var vista = document.createElement("span");
+      vista.className = "opcion-vista";
+      var lienzo = document.createElement("canvas");
+      lienzo.setAttribute("data-tipo", t.id);
+      lienzo.width = 1; lienzo.height = 1;
+      lienzo.hidden = true;
+      vista.appendChild(lienzo);
       var textos = document.createElement("span");
+      textos.className = "opcion-textos";
       var nombre = document.createElement("span");
       nombre.className = "opcion-nombre"; nombre.textContent = t.nombre;
       var desc = document.createElement("span");
       desc.className = "opcion-desc"; desc.textContent = t.descripcion;
       textos.appendChild(nombre); textos.appendChild(desc);
-      label.appendChild(input); label.appendChild(textos);
+      label.appendChild(vista); label.appendChild(textos); label.appendChild(input);
       el.tipos.appendChild(label);
     });
     el.limite.textContent = "Máximo " + LIMITE + " cartas" +
       (MOVIL ? " en este dispositivo (celular o tablet)." : " por PDF.");
+  }
+
+  /* ---------------- Adornos: papel picado, abanico de cartas ---------------- */
+  var COLORES_PAPEL = ["#e4007c", "#f7941d", "#ffc20e", "#00a651", "#00a3ad", "#6b2c91", "#d7263d"];
+
+  function papelPicado() {
+    var cont = $("papel-picado");
+    if (!cont) return;
+    for (var i = 0; i < 40; i++) {
+      var b = document.createElement("span");
+      b.className = "bandera";
+      b.style.color = COLORES_PAPEL[i % COLORES_PAPEL.length];
+      b.innerHTML = '<svg viewBox="0 0 60 72" fill="currentColor"><use href="#bandera"></use></svg>';
+      cont.appendChild(b);
+    }
+  }
+
+  /* Figuras al azar distintas (para el abanico y el cantor). */
+  function figurasAlAzar(cuantas) {
+    return Loteria.barajar(Math.random, Loteria.TOTAL_FIGURAS).slice(0, cuantas);
+  }
+  function urlFigura(n) { return "img/cd/" + n + ".jpg"; }
+
+  function abanico() {
+    var cont = $("abanico");
+    if (!cont) return;
+    figurasAlAzar(5).forEach(function (n) {
+      var img = document.createElement("img");
+      img.src = urlFigura(n);
+      img.alt = "";
+      img.width = 84; img.height = 120;
+      img.decoding = "async";
+      cont.appendChild(img);
+    });
+  }
+
+  /* Dibuja una hoja de ejemplo de cada tipo en su carta (vista previa). */
+  function pintarVistasPrevias() {
+    if (typeof createImageBitmap !== "function") return;
+    var LADO = 240;   // pixeles del lado mas largo de la vista previa
+    var porGenerador = {};
+    Loteria.TIPOS.forEach(function (t) {
+      (porGenerador[t.generador] = porGenerador[t.generador] || []).push(t);
+    });
+    Object.keys(porGenerador).forEach(function (nombreGen) {
+      var gen = Loteria.generadores[nombreGen];
+      var escala = LADO / Math.max(gen.hoja.ancho, gen.hoja.alto);
+      var imagenes = {};
+      Promise.all(gen.imagenes.map(function (def) {
+        return Promise.all(estado.blobs[def.conjunto].map(function (b) {
+          return createImageBitmap(b, {
+            resizeWidth: Math.max(1, Math.round(def.ancho * escala)),
+            resizeHeight: Math.max(1, Math.round(def.alto * escala)),
+            resizeQuality: "high"
+          }).catch(function () { return createImageBitmap(b); });
+        })).then(function (lista) { imagenes[def.conjunto] = [null].concat(lista); });
+      })).then(function () {
+        var tamanos = {};
+        gen.imagenes.forEach(function (d) { tamanos[d.conjunto] = d; });
+        porGenerador[nombreGen].forEach(function (t) {
+          var lienzo = el.tipos.querySelector('canvas[data-tipo="' + t.id + '"]');
+          if (!lienzo) return;
+          lienzo.width = Math.round(gen.hoja.ancho * escala);
+          lienzo.height = Math.round(gen.hoja.alto * escala);
+          var ctx = lienzo.getContext("2d");
+          ctx.fillStyle = "#000";
+          ctx.fillRect(0, 0, lienzo.width, lienzo.height);
+          gen.colocar(gen.repartir(t.opciones, Math.random), t.opciones).forEach(function (c) {
+            var d = tamanos[c.conjunto];
+            ctx.drawImage(imagenes[c.conjunto][c.figura], c.x * escala, c.y * escala, d.ancho * escala, d.alto * escala);
+          });
+          lienzo.hidden = false;
+        });
+        Object.keys(imagenes).forEach(function (k) {
+          imagenes[k].forEach(function (img) { if (img && img.close) img.close(); });
+        });
+      }).catch(function () { /* la vista previa es solo un adorno */ });
+    });
+  }
+
+  /* El cantor: cada hoja nueva "canta" una carta distinta. */
+  var cantorUltima = -1;
+  function cantarCarta(hechas) {
+    if (hechas === cantorUltima) return;
+    cantorUltima = hechas;
+    var img = $("cantor-carta");
+    if (!img) return;
+    img.src = urlFigura(figurasAlAzar(1)[0]);
+    img.classList.remove("volteo");
+    void img.offsetWidth;   // reinicia la animacion
+    img.classList.add("volteo");
+  }
+
+  /* ---------------- Cantidad: botones - / + y atajos ---------------- */
+  function ponerCantidad(n) {
+    el.cantidad.value = String(Math.max(1, Math.min(LIMITE, n)));
+    leerCantidad();
+  }
+  function prepararCantidad() {
+    [5, 10, 20, 50, 100, 300].filter(function (n) { return n <= LIMITE; }).forEach(function (n) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "atajo";
+      b.textContent = String(n);
+      b.addEventListener("click", function () { ponerCantidad(n); });
+      $("atajos").appendChild(b);
+    });
+    el.form.querySelectorAll(".ajuste").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var actual = parseInt(el.cantidad.value, 10);
+        if (isNaN(actual)) actual = 0;
+        ponerCantidad(actual + parseInt(b.getAttribute("data-paso"), 10));
+      });
+    });
+  }
+  function bloquearFormulario(bloquear) {
+    el.form.querySelectorAll("input, .ajuste, .atajo").forEach(function (i) { i.disabled = bloquear; });
   }
 
   /* ---------------- Validacion de la cantidad ---------------- */
@@ -248,6 +374,7 @@
   }
 
   function mostrarProgreso(hechas, total) {
+    cantarCarta(hechas);
     el.trabajoTexto.textContent = "Generando carta " + hechas + " de " + total;
     barra(el.trabajoRelleno, total ? hechas / total : 0);
   }
@@ -338,11 +465,13 @@
     estado.ocupado = true;
     estado.cancelado = false;
     actualizarBotonGenerar();
-    el.form.querySelectorAll("input").forEach(function (i) { i.disabled = true; });
+    bloquearFormulario(true);
     el.trabajo.hidden = false;
     verSeccion(el.trabajo);
     el.cancelar.disabled = false;
     el.trabajoTexto.textContent = "Preparando…";
+    cantorUltima = -1;
+    cantarCarta(0);
     barra(el.trabajoRelleno, 0);
     pedirPantallaEncendida();
 
@@ -362,7 +491,7 @@
       estado.ocupado = false;
       estado.trabajoActual = null;
       el.trabajo.hidden = true;
-      el.form.querySelectorAll("input").forEach(function (i) { i.disabled = false; });
+      bloquearFormulario(false);
       actualizarBotonGenerar();
       soltarPantalla();
     });
@@ -396,6 +525,7 @@
         return;
       }
       estado.modo = modo;
+      pintarVistasPrevias();
       estado.listo = true;
       el.carga.hidden = true;
       actualizarBotonGenerar();
@@ -419,7 +549,10 @@
     if (estado.urlPdf) URL.revokeObjectURL(estado.urlPdf);
   });
 
+  papelPicado();
+  abanico();
   pintarTipos();
+  prepararCantidad();
   Promise.all(Loteria.scriptsGeneradores().map(cargarScript)).then(arrancar, function () {
     el.carga.hidden = true;
     mostrarAviso(MENSAJES.sin_red);
